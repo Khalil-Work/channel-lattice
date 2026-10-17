@@ -86,7 +86,7 @@ except type errors, which raise `TypeError`):
 | `profile()` | `(js, u_mean)`: fluid-node coordinates and streamwise-averaged `u_x`. |
 | `analytic_profile()` | Exact steady parabola at the same nodes. |
 | `error_norms()` | `(rel_L2, rel_Linf)` against the analytic profile. |
-| `run_until_steady(tol=1e-9, max_steps=None, check_every=250)` | Iterate until the mean profile changes by `< tol * u_max` between checks; returns step count, sets `converged`/`steady_residual`. |
+| `run_until_steady(tol=1e-9, max_steps=None, check_every=250)` | Iterate until the mean profile changes by `< tol * u_max` between checks (measured stopping criterion; last change stored in `steady_residual`). `max_steps` is a **budget of additional steps for this call** (nonnegative int or `None` = automatic); chunks are capped so the budget is never overshot; returns the steps performed in this call while `self.steps` stays cumulative; `converged` is reset on entry. Validates `tol` finite positive, `check_every` positive integer, `max_steps` nonnegative integer. |
 
 **Per-step diagnostics** (attributes updated by `step()`):
 

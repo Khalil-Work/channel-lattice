@@ -347,24 +347,80 @@ class ChannelFlowLBM:
                          check_every: int = 250) -> int:
         """Iterate until the mean profile stops changing within ``tol``.
 
-        Convergence is measured on the streamwise-averaged ``u_x`` profile:
-        the run stops when the profile changes by less than
-        ``tol * u_max_analytic`` (infinity norm) between checks.  Because the
-        diffusive relaxation time of the channel grows like ``h^2 / nu``, a
-        fixed iteration budget is *not* a convergence proof on refined
-        grids; this adaptive criterion is.  The last measured per-check
-        profile change is stored in ``self.steady_residual`` (absolute,
-        lattice units) as evidence of the steady state.
+        Stopping criterion (measured, not a formal error bound): the run
+        stops when the streamwise-averaged ``u_x`` profile changes by less
+        than ``tol * u_max_analytic`` (infinity norm) between checks.  The
+        last measured per-check profile change is stored in
+        ``self.steady_residual`` (absolute, lattice units; ``inf`` if no
+        check ran) as evidence of the steady state.  Because the diffusive
+        relaxation time of the channel grows like ``h^2 / nu``, a step
+        budget that suffices on a coarse grid may be exhausted on a fine
+        one — callers who care should check ``self.converged``.
 
-        Returns the number of steps performed; also sets ``self.converged``.
+        Parameters
+        ----------
+        tol : float
+            Finite, strictly positive; in units of ``u_max_analytic``.
+        max_steps : int or None
+            *Budget of additional steps for this call* (nonnegative
+            integer).  Each check chunk is capped to the remaining budget,
+            so the solver never overshoots.  ``None`` selects the automatic
+            budget ``ceil(8 h^2 / nu) + 2000``.  Note that ``self.steps``
+            is the cumulative step count over the solver's lifetime; the
+            return value counts only this call.
+        check_every : int
+            Strictly positive integer; steps between convergence checks.
+
+        Returns
+        -------
+        int
+            Number of steps performed in this call.  ``self.converged`` is
+            reset to ``False`` on entry and set only if the criterion was
+            met during this call.
+
+        Raises
+        ------
+        ChannelLatticeError
+            If ``tol`` is not finite and positive, ``check_every`` is not
+            a positive integer, or ``max_steps`` is not a nonnegative
+            integer.
         """
-        if max_steps is None:
-            max_steps = int(np.ceil(8.0 * self.h_lattice ** 2 / self.nu)) + 2000
+        try:
+            tol_val = float(tol)
+        except (TypeError, ValueError):
+            tol_val = float("nan")
+        if isinstance(tol, bool) or not np.isfinite(tol_val) or tol_val <= 0.0:
+            raise ChannelLatticeError(
+                f"tol must be a finite positive tolerance in units of "
+                f"u_max_analytic, got {tol!r}"
+            )
+        if isinstance(check_every, bool) or not isinstance(
+                check_every, (int, np.integer)) or check_every < 1:
+            raise ChannelLatticeError(
+                f"check_every must be a positive integer number of steps "
+                f"between convergence checks, got {check_every!r}"
+            )
+        if max_steps is not None and (isinstance(max_steps, bool)
+                                      or not isinstance(max_steps,
+                                                        (int, np.integer))
+                                      or max_steps < 0):
+            raise ChannelLatticeError(
+                f"max_steps must be a nonnegative integer step budget for "
+                f"this call (or None for the automatic budget), got "
+                f"{max_steps!r}"
+            )
+        budget = (int(np.ceil(8.0 * self.h_lattice ** 2 / self.nu)) + 2000
+                  if max_steps is None else int(max_steps))
+        check_every = int(check_every)
+
+        self.converged = False
         u_ref = max(self.u_max_analytic, 1e-300)
+        start = self.steps
         prev = self.profile()[1].copy()
         self.steady_residual = float("inf")
-        while self.steps < max_steps:
-            for _ in range(check_every):
+        while self.steps - start < budget:
+            chunk = min(check_every, budget - (self.steps - start))
+            for _ in range(chunk):
                 self.step()
             cur = self.profile()[1]
             self.steady_residual = float(np.max(np.abs(cur - prev)))
@@ -372,7 +428,7 @@ class ChannelFlowLBM:
                 self.converged = True
                 break
             prev = cur
-        return self.steps
+        return self.steps - start
 
     def __repr__(self) -> str:  # pragma: no cover - cosmetic
         return (

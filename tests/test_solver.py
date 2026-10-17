@@ -115,3 +115,61 @@ def test_flow_moves_in_forcing_direction(small_flow):
     _, ux, uy = flow.macroscopic()
     assert float(ux.max()) > 0.01 * flow.u_max_analytic
     np.testing.assert_allclose(uy, 0.0, atol=1e-12)
+
+
+# --------------------------------------------------------------------- #
+# run_until_steady run control
+# --------------------------------------------------------------------- #
+def _tiny_flow():
+    return ChannelFlowLBM(nx=8, ny=13, tau=0.8,
+                          force_g=8 * 0.1 * 0.05 / 121)
+
+
+@pytest.mark.parametrize("bad", [
+    {"check_every": 0},      # zero would never advance (infinite loop before)
+    {"check_every": -5},
+    {"check_every": 2.5},    # non-integer
+    {"check_every": True},   # bool masquerading as int
+])
+def test_run_control_rejects_invalid_check_every(bad):
+    with pytest.raises(ChannelLatticeError, match="check_every"):
+        _tiny_flow().run_until_steady(**bad)
+
+
+@pytest.mark.parametrize("bad", [
+    {"tol": 0.0},
+    {"tol": -1e-9},
+    {"tol": float("nan")},
+    {"tol": float("inf")},
+])
+def test_run_control_rejects_invalid_tol(bad):
+    with pytest.raises(ChannelLatticeError, match="tol"):
+        _tiny_flow().run_until_steady(**bad)
+
+
+@pytest.mark.parametrize("bad", [
+    {"max_steps": -1},
+    {"max_steps": 1.5},      # non-integer
+    {"max_steps": True},
+])
+def test_run_control_rejects_invalid_max_steps(bad):
+    with pytest.raises(ChannelLatticeError, match="max_steps"):
+        _tiny_flow().run_until_steady(**bad)
+
+
+def test_run_control_never_overshoots_step_budget():
+    flow = _tiny_flow()
+    done = flow.run_until_steady(max_steps=37)   # check_every default is 250
+    assert done == 37                            # chunk capped to budget
+    assert flow.steps == 37                      # cumulative == budget used
+
+
+def test_run_control_budget_is_per_call_and_flag_resets():
+    flow = _tiny_flow()
+    assert flow.run_until_steady(tol=1.0, check_every=1) == 1
+    assert flow.converged                       # trivially loose criterion
+    assert flow.run_until_steady(max_steps=0) == 0
+    assert flow.converged is False              # exhausted call resets flag
+    done = flow.run_until_steady(max_steps=10)
+    assert done == 10                           # budget counts this call only
+    assert flow.steps == 11                     # cumulative across calls
