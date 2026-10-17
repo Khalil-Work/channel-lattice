@@ -72,6 +72,15 @@ rho   = sum_q f_q
 rho u = sum_q c_q f_q  +  F dt / 2        (dt = 1)
 ```
 
+**Startup convention.** The initial state is `f^eq(rho0, 0)` — zero *raw*
+momentum, `sum_q c_q f_q = 0`. Under the definition above the
+macroscopic velocity at `t = 0` is therefore `u = g/2`, the half-step
+startup value, rather than exactly zero. This value is orders of magnitude
+below the steady `u_max` (for the benchmark, `3.6e-5` vs `0.065`) and
+relaxes into the forced solution; steady-state results are unaffected.
+The animation and README state this convention instead of claiming an
+exactly-at-rest start.
+
 The equilibrium is the second-order (low-Mach) expansion:
 
 ```

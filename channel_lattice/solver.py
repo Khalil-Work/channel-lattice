@@ -160,7 +160,11 @@ class ChannelFlowLBM:
         self._c = self._lat.velocities
         self._w = self._lat.weights
 
-        # Start from rest: equilibrium at uniform density, zero velocity.
+        # Initial state: equilibrium at uniform density and ZERO RAW
+        # MOMENTUM (sum_q c_q f_q = 0).  Under the Guo velocity definition
+        # the macroscopic velocity at t = 0 is therefore u = g/2 (the
+        # half-step startup value), not exactly zero; it is far below the
+        # steady u_max and relaxes into the forced solution.
         rho_field = np.full((nx, ny), rho0, dtype=np.float64)
         zero = np.zeros((nx, ny), dtype=np.float64)
         self.f = self._lat.equilibrium(rho_field, zero, zero)

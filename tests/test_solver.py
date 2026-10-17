@@ -77,11 +77,14 @@ def test_geometry_conventions(small_flow):
     assert flow.omega == pytest.approx(1.0 / 0.8)
 
 
-def test_initial_state_is_rest_at_uniform_density(small_flow):
+def test_initial_state_has_zero_raw_momentum(small_flow):
+    # Startup convention: populations are equilibrium at zero raw momentum,
+    # so the Guo macroscopic velocity at t = 0 is u = g/2 (half-step value),
+    # not exactly zero.
     flow = small_flow
     rho, ux, uy = flow.macroscopic()
     np.testing.assert_allclose(rho, flow.rho0, rtol=0, atol=1e-14)
-    # Guo half-force correction: u = (sum f c)/rho + g/2 = g/2 from rest.
+    # Guo half-force correction: u = (sum f c)/rho + g/2 = g/2 at t = 0.
     np.testing.assert_allclose(ux, 0.5 * flow.force_g, rtol=0, atol=1e-18)
     np.testing.assert_allclose(uy, 0.0, atol=1e-16)
 
