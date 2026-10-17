@@ -70,9 +70,12 @@ setup, so they hold across platforms while still catching regressions.
 | wall-clock (incl. diagnostics) | 26 s |
 
 * `channel_profile.png` — cover still: computed profile vs analytic.
-* `profile_development.gif` — 60 frames, 1008x672, 8 fps; every frame is a
-  computed state captured between steps 0 and 16 250, fixed axes, white
-  background, no grid lines.
+* `profile_development.gif` — 62 frames, 1008x672, 8 fps; every frame is a
+  computed state, from `t = 0` (Guo half-step startup, `u = g/2`) to the
+  steady state at step 16 250; the encoded frame times are asserted to
+  match the capture schedule exactly. Fixed axes, white background, no
+  grid lines; the heading is concise and the time annotation sits inside
+  the axes so nothing clips.
 
 ## 3. Grid-refinement study (`convergence.csv`, `convergence.png`)
 

@@ -130,7 +130,16 @@ def plot_cover(flow: ChannelFlowLBM, row: dict) -> Path:
 
 
 def capture_animation(params: dict, steady_steps: int) -> tuple[Path, list[int]]:
-    """Rerun from rest, saving the true computed profile at fixed intervals."""
+    """Rerun from the zero-momentum start, saving true computed states.
+
+    The frame schedule includes ``t = 0`` (the Guo half-step startup
+    profile, visually flat) and runs to the measured steady step count.
+    Frames are indexed positionally into the schedule with an explicit
+    ``init_func``, so the first encoded frame shows ``t = 0`` and the last
+    shows the steady state, deterministically.  A concise static title is
+    paired with a two-line time annotation placed *inside* the axes, so
+    nothing can clip at the canvas edges.
+    """
     flow = make_flow(params["nx"], params["ny"], params["tau"],
                      params["u_target"])
     u_max_ex = flow.u_max_analytic
@@ -144,35 +153,49 @@ def capture_animation(params: dict, steady_steps: int) -> tuple[Path, list[int]]
     fig, ax = plt.subplots(figsize=(7.2, 4.8), dpi=140)
     fig.patch.set_facecolor("white")
     style_axes(ax, flow.ny, u_max_ex)
-    js, u0 = flow.profile()
-    (line,) = ax.plot(u0, js, color="#1565c0", lw=2.0,
+    js, u_start = flow.profile()
+    (line,) = ax.plot(u_start, js, color="#1565c0", lw=2.0,
                       label="computed profile $u_x(y,t)$")
     (exact,) = ax.plot(flow.analytic_profile(), js, "k--", lw=1.2,
                        label="analytic steady profile")
-    title = ax.set_title("")
+    ax.set_title("Development of the plane Poiseuille profile", fontsize=11)
+    # Two-line, dynamic time annotation INSIDE the axes (cannot clip).
+    annot = ax.text(0.98, 0.965, "", transform=ax.transAxes, ha="right",
+                    va="top", fontsize=9, family="DejaVu Sans")
     ax.legend(loc="lower right", frameon=False, fontsize=9)
-    # FuncAnimation may invoke the update function once for initialisation;
-    # pulling targets from an iterator makes extra calls harmless no-ops.
-    targets = iter(schedule[1:])
+    recorded: list[int] = []
 
-    def update(_frame_idx: int):
-        target = next(targets, schedule[-1])
+    def _annotate(n_steps: int, u: np.ndarray) -> None:
+        frac = float(u.max()) / u_max_ex
+        annot.set_text(f"t = {n_steps} lattice steps\n"
+                       f"$u_{{\\max}}$ = {frac:.1%} of steady")
+
+    def init():
+        _annotate(0, u_start)
+        return line, exact, annot
+
+    def update(frame_idx: int):
+        target = schedule[frame_idx]
         while flow.steps < target:
             flow.step()
         _, u = flow.profile()
         line.set_data(u, js)
-        title.set_text(
-            "Development of the plane Poiseuille profile"
-            f"    t = {flow.steps} lattice steps"
-            f"    ($u_{{max}}$ = {float(u.max()) / u_max_ex:.1%} of steady)"
-        )
-        return line, exact, title
+        _annotate(flow.steps, u)
+        recorded.append(flow.steps)
+        return line, exact, annot
 
     out = RESULTS / "profile_development.gif"
-    anim = FuncAnimation(fig, update, frames=len(schedule), interval=125)
+    anim = FuncAnimation(fig, update, init_func=init,
+                         frames=range(len(schedule)), interval=125)
     anim.save(out, writer=PillowWriter(fps=8), savefig_kwargs={
         "facecolor": fig.get_facecolor()})
     plt.close(fig)
+    # Reconcile the encoded frames with the schedule before reporting.
+    if recorded != schedule:
+        raise RuntimeError(
+            f"encoded frame steps diverge from schedule: first={recorded[0] if recorded else None}, "
+            f"last={recorded[-1] if recorded else None}, expected "
+            f"({schedule[0]}, {schedule[-1]})")
     return out, schedule
 
 
@@ -278,7 +301,11 @@ def main() -> None:
     with Image.open(gif) as im:
         frames = im.n_frames
         size = im.size
-    print(f"  animation: {gif.name} ({frames} frames, {size[0]}x{size[1]} px)")
+    if frames != len(schedule):
+        raise RuntimeError(
+            f"GIF encodes {frames} frames but schedule has {len(schedule)}")
+    print(f"  animation: {gif.name} ({frames} frames, {size[0]}x{size[1]} px, "
+          f"t = {schedule[0]} .. {schedule[-1]})")
 
     # ------------------------------------------------------------------ #
     print("[2/4] grid-refinement study")
