@@ -117,7 +117,9 @@ Reference: [docs/api.md](docs/api.md).
 | rel. L2 | 8.93e-4 | 3.80e-4 | 2.09e-4 | 9.09e-5 | 5.06e-5 |
 
 Measured convergence order **p = 2.00** (error ~ `dx^2`), consistent with
-half-way bounce-back on lattice-aligned walls. The tau study shows the
+half-way bounce-back on lattice-aligned walls — for this x-uniform steady
+parabola at fixed `tau` and lattice speed, not a general fixed-Re unsteady
+refinement study. The tau study shows the
 error optimum near `tau ~ 0.9-1.0` and growth toward both `tau -> 1/2`
 (viscosity collapse, bounce-back slip) and large `tau`. Full data:
 [docs/verification.md](docs/verification.md),

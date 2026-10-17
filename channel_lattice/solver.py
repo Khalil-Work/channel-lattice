@@ -114,9 +114,10 @@ class ChannelFlowLBM:
         if not (_TAU_MIN < tau <= _TAU_MAX):
             raise ChannelLatticeError(
                 f"tau must lie in ({_TAU_MIN}, {_TAU_MAX}]: "
-                f"tau > 0.5 keeps the viscosity cs^2*(tau-1/2) positive "
-                f"(BGK is unconditionally unstable otherwise), and very "
-                f"large tau only adds diffusion; got tau={tau}"
+                f"tau > 0.5 is required for a positive viscosity "
+                f"cs^2*(tau-1/2) (at tau <= 0.5 the BGK viscosity is "
+                f"non-positive and the scheme has no viscous term), and "
+                f"very large tau only adds diffusion; got tau={tau}"
             )
 
         try:

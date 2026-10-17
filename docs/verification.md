@@ -77,7 +77,13 @@ setup, so they hold across platforms while still catching regressions.
 ## 3. Grid-refinement study (`convergence.csv`, `convergence.png`)
 
 `tau = 0.9`, `u_max = 0.06` held fixed, `ny in {17, 25, 33, 49, 65}`
-(`h = 15..63`):
+(`h = 15..63`). Scope of this study: it holds the relaxation time, the
+target lattice speed (hence Ma), and `nu` fixed, and measures the error
+of the x-uniform steady parabola. It is a discretisation study of this
+specific solution — not a general fixed-Reynolds-number, unsteady CFD
+refinement study (Re and the lattice-unit viscosity are not held
+constant across grids; an unsteady or Re-matched study needs a
+consistent physical-to-lattice scaling per grid).
 
 | h | rel. L2 | rel. L∞ | steps |
 |---|---|---|---|
