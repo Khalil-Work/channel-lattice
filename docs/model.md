@@ -108,15 +108,44 @@ The three consistency ingredients that must travel together are:
 3. the macroscopic velocity used in `f^eq` and in `S_q` includes the
    half-force correction `u = (sum c f)/rho + F/(2 rho)` from Section 3.
 
-**Consistency caveat.** Simpler forcing rules (shifting the equilibrium
-velocity by `F dt/(2 rho)` only, or adding `w_q (c_q . F)/cs^2` alone) do
-*not* contain the `(c_q - u)` and `(c_q . u) c_q` pieces. Those dropped
-terms are O(dt) for forced flows: they change the discrete force moment
-`sum_q S_q c_q` away from `F` and pollute the momentum balance at the
-level of the truncation error. The Guo rule keeps `sum_q S_q = 0` (no
-mass input) and `sum_q S_q c_q = F` exactly — both are unit-tested
-(`tests/test_lattice.py`), and the exact per-step momentum balance of the
-full algorithm is tested in `tests/test_solver.py`.
+**Consistency caveat — where the forcing rules actually differ.** A simpler
+source sometimes seen is the purely linear piece `w_q (c_q . F) / cs^2`.
+On D2Q9 that simple source is *not* distinguished by its lowest moments:
+with the isotropy identities `sum_q w_q c_q = 0` and
+`sum_q w_q c_qa c_qb = cs^2 delta_ab` it also has exactly
+`sum_q S_q = 0` and `sum_q S_q c_q = F` — mass conservation and correct
+momentum input hold for both rules. The distinction appears in the
+**second moment**, which feeds the momentum flux (stress). Expanding the
+Guo source with the higher-order isotropy identities
+`sum_q w_q c_qa c_qb c_qg = 0` and
+`sum_q w_q c_qa c_qb c_qg c_qd = cs^4 (delta_ab delta_gd + delta_ag
+delta_bd + delta_ad delta_bg)` gives:
+
+```
+Guo source:    sum_q S_q c_qa c_qb = u_a F_b + u_b F_a
+linear source: sum_q S_q c_qa c_qb = 0
+```
+
+(Derivation sketch. First piece of the Guo rule:
+`[sum w c_a c_b c_g F_g - (u.F) sum w c_a c_b]/cs^2 = -(u.F) delta_ab`,
+using the third- and second-order identities. Second piece:
+`[sum w c_a c_b c_g c_d] u_g F_d / cs^4 = (u.F) delta_ab + u_a F_b +
+u_b F_a` via the fourth-order identity. The `(u.F) delta_ab` terms cancel,
+leaving `u_a F_b + u_b F_a`. The linear source contracts
+`F_g sum w c_a c_b c_g / cs^2 = 0` by the third-order identity. Both
+results hold exactly, to machine precision.)
+
+The forced Navier–Stokes momentum equation carries exactly the
+`u (x) F + F (x) u` contribution in its convective flux; a source with a
+vanishing second moment is inconsistent with the forced momentum equation
+at the level of the stress, which is where the truncation error of naive
+forcing schemes shows up. Separately, the prefactor `(1 - 1/(2 tau))` and
+the half-force velocity correction of Section 3 must travel together:
+they place the force at the half time step at which the trapezoidal
+collision acts, and mixing a velocity-shift rule with only part of the
+Guo rule breaks that timing. The zeroth and first source moments are
+unit-tested in `tests/test_lattice.py`; the exact per-step momentum
+balance of the assembled algorithm is tested in `tests/test_solver.py`.
 
 ### 4.2 Streaming and the periodic streamwise direction
 
