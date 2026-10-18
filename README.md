@@ -168,3 +168,5 @@ error optimum near `tau ~ 0.9-1.0` and growth toward both `tau -> 1/2`
 
 MIT — see [LICENSE](LICENSE). Standard numerical methods, written from
 scratch; every line of code in this repository is original work.
+
+History metadata: [documented calendar records](docs/CALENDAR_HISTORY.md).
