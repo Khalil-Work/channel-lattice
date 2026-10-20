@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/banner.svg" alt="Channel Lattice banner: D2Q9 velocity stencil and the emerging parabolic Poiseuille profile between walls" width="100%">
+<img src="docs/banner.gif" alt="Channel Lattice animated banner: particles streaming through a channel with a D2Q9 stencil" width="100%">
 
 # 🧱 Channel Lattice
 
