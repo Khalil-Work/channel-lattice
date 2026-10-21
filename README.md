@@ -11,13 +11,13 @@ verified against the analytic parabolic profile — walls at their true half-way
 positions, amplitude not just shape, conservation to round-off, and measured
 second-order convergence.**
 
-[![tests](https://github.com/khalil-official/channel-lattice/actions/workflows/ci.yml/badge.svg)](https://github.com/khalil-official/channel-lattice/actions/workflows/ci.yml)
+[![tests](https://github.com/khalil-work/channel-lattice/actions/workflows/ci.yml/badge.svg)](https://github.com/khalil-work/channel-lattice/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![python](https://img.shields.io/badge/python-3.12%20%7C%203.13-blue.svg)](requirements.txt)
 [![tests](https://img.shields.io/badge/tests-55%20passing-brightgreen.svg)](tests)
 [![convergence](https://img.shields.io/badge/measured%20order-p%20%3D%202.00-orange.svg)](docs/verification.md)
-[![repo stars](https://img.shields.io/github/stars/khalil-official/channel-lattice?style=flat&color=yellow)](https://github.com/khalil-official/channel-lattice/stargazers)
-[![last commit](https://img.shields.io/github/last-commit/khalil-official/channel-lattice?color=9cf)](https://github.com/khalil-official/channel-lattice/commits)
+[![repo stars](https://img.shields.io/github/stars/khalil-work/channel-lattice?style=flat&color=yellow)](https://github.com/khalil-work/channel-lattice/stargazers)
+[![last commit](https://img.shields.io/github/last-commit/khalil-work/channel-lattice?color=9cf)](https://github.com/khalil-work/channel-lattice/commits)
 
 [Quick start](#-quick-start) · [Model](#-model-summary) · [Animation](#%EF%B8%8F-results-gallery) · [Verification](#%EF%B8%8F-verification-summary) · [References](#-references)
 

@@ -9,7 +9,7 @@ description = "D2Q9 lattice-Boltzmann solver for plane Poiseuille channel flow, 
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "MOHAMMED AHMED" }]
+authors = [{ name = "KHALIL" }]
 keywords = ["lattice-boltzmann", "d2q9", "fluid-dynamics", "poiseuille", "verification"]
 classifiers = [
     "Intended Audience :: Science/Research",
