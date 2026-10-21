@@ -63,10 +63,10 @@ Full equations, conventions, and the lattice/physical unit mapping:
 
 ```mermaid
 flowchart LR
-    A[f populations] --> B[ macroscopic rho, u<br/>with Guo half-force ]
-    B --> C[ BGK collide:<br/>f* = f − (dt/tau)(f − f_eq) + S_q ]
+    A[f populations] --> B["macroscopic rho, u<br/>with Guo half-force"]
+    B --> C["BGK collide:<br/>f* = f − (dt/tau)(f − f_eq) + S_q"]
     C --> D[ stream along<br/>the 9 velocities ]
-    D --> E[ half-way bounce-back<br/>at walls y = 0.5, ny−1.5 ]
+    D --> E["half-way bounce-back<br/>at walls y = 0.5, ny−1.5"]
     E --> F[ periodic wrap<br/>streamwise ]
     F --> A
 ```
