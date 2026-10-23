@@ -19,7 +19,7 @@ second-order convergence.**
 [![repo stars](https://img.shields.io/github/stars/khalil-work/channel-lattice?style=flat&color=yellow)](https://github.com/khalil-work/channel-lattice/stargazers)
 [![last commit](https://img.shields.io/github/last-commit/khalil-work/channel-lattice?color=9cf)](https://github.com/khalil-work/channel-lattice/commits)
 
-[Quick start](#-quick-start) · [Model](#-model-summary) · [Animation](#%EF%B8%8F-results-gallery) · [Verification](#%EF%B8%8F-verification-summary) · [References](#-references)
+[Homepage](https://khalil-work.github.io) · [Quick start](#-quick-start) · [Model](#-model-summary) · [Animation](#%EF%B8%8F-results-gallery) · [Verification](#%EF%B8%8F-verification-summary) · [References](#-references)
 
 </div>
 
